@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: app/
+    container_name: app-service
+    environment:
+      - PYTHONUNBUFFERED
+      - DEBUG
+      - PORT
+      - ENVIRONMENT=${ENVIRONMENT-DEV}
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/postgres
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    command: bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - ./app/:/app
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data/
+
+volumes:
+  postgresql_data:
